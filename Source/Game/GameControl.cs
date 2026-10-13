@@ -148,7 +148,6 @@ namespace RimBridge.GameCtl
             return new JObject { ["dev_mode"] = Prefs.DevMode, ["god_mode"] = DebugSettings.godMode };
         }
 
-        [Rpc("game.log_tail", "{lines?: 100, filter?: substring} tail Player.log", MainThread = false)]
         static string WinPlayerLog()
         {
             string local = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
@@ -158,11 +157,14 @@ namespace RimBridge.GameCtl
             return Path.Combine(low, "Ludeon Studios", "RimWorld by Ludeon Studios", "Player.log");
         }
 
+        [Rpc("game.log_tail", "{lines?: 100, filter?: substring} tail Player.log", MainThread = false)]
         public static JToken LogTail(JObject p)
         {
             int n = P.Int(p, "lines", 100);
             string? filter = P.OptStr(p, "filter");
             string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal), "Library/Logs/Ludeon Studios/RimWorld by Ludeon Studios/Player.log");
+            string mac17 = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal), "Library/Application Support/Ludeon Studios/RimWorld by Ludeon Studios/Logs/Player.log");
+            if (File.Exists(mac17)) path = mac17; // 1.7 (Waylith)
             if (!File.Exists(path)) path = WinPlayerLog();
             if (!File.Exists(path)) throw new RpcError("Player.log not found (checked LocalLow and ~/Library/Logs)");
             string[] lines;

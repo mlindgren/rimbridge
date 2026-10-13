@@ -32,6 +32,7 @@ namespace RimBridge
             Settings = GetSettings<BridgeSettings>();
             new Harmony("zorrobyte.rimbridge").PatchAll();
             Rpc.RegisterAll();
+            if (GenCommandLine.TryGetCommandLineArg("rimbridge-port", out var portArg) && int.TryParse(portArg, out var p)) Settings.port = p;
             if (Settings.enabled)
             {
                 Server = new HttpServer(Settings.port);
