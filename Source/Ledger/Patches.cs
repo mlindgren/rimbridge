@@ -260,7 +260,9 @@ namespace RimBridge.Ledger
     /// <summary>Shared filter for the social/character patches: "concerns the colony" = player faction or a prisoner of the colony.</summary>
     static class LedgerPawn
     {
-        public static bool IsColony(Pawn? p) => p != null && (p.Faction == Faction.OfPlayer || p.IsPrisonerOfColony);
+        // Faction.IsPlayer, not Faction.OfPlayer: the latter logs "Could not find player faction." during world generation,
+        // when faction leaders get their old-age hediffs before the player faction exists.
+        public static bool IsColony(Pawn? p) => p != null && (p.Faction is { IsPlayer: true } || p.IsPrisonerOfColony);
 
         public static void Relation(Pawn? a, Pawn? b, PawnRelationDef? def, bool added)
         {
