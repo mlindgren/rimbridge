@@ -226,6 +226,15 @@ namespace RimBridge.Ui
             if (p["target_b"] != null) job.targetB = (LocalTargetInfo)Coerce.To(p["target_b"], typeof(LocalTargetInfo))!;
             if (p["target_c"] != null) job.targetC = (LocalTargetInfo)Coerce.To(p["target_c"], typeof(LocalTargetInfo))!;
             if (p["count"] != null) job.count = P.Int(p, "count");
+            if (def == JobDefOf.Rescue && job.targetB.Thing == null)
+            {
+                // the Rescue driver reserves targetB (the bed) and carries count=1; without them it throws a NullReferenceException
+                if (job.targetA.Thing is not Pawn victim) throw new RpcError("Rescue needs target = the downed pawn");
+                var bed = RestUtility.FindBedFor(victim, pawn, checkSocialProperness: false)
+                    ?? throw new RpcError($"no free bed for {victim.LabelShort}; build or free a bed first");
+                job.targetB = bed;
+                if (p["count"] == null) job.count = 1;
+            }
             job.playerForced = true;
             bool wasDrafted = pawn.Drafted;
             bool ok = pawn.jobs.TryTakeOrderedJob(job, JobTag.Misc, P.Bool(p, "queue", false));
